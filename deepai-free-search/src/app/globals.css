@@ -1,0 +1,134 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1f2937; /* bg-gray-800 */
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #4b5563; /* bg-gray-600 */
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #6b7280; /* bg-gray-500 */
+}
+
+.prose-invert {
+  max-width: 100%;
+}
+
+.prose-invert p {
+  margin: 0;
+}
+
+.prose-invert strong {
+  color: #fff;
+  font-weight: 600;
+}
+
+.prose-invert em {
+  color: #9CA3AF; /* text-gray-400 */
+  font-style: italic;
+  display: block;
+  margin-top: 0.5rem;
+}
+
+.prose-invert code {
+  background-color: #374151;
+  padding: 0.2em 0.4em;
+  border-radius: 0.25rem;
+  font-family: monospace;
+}
+
+.prose-invert pre {
+  background-color: #1f2937;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  margin: 0.5rem 0;
+}
+
+.prose-invert a {
+  color: #60a5fa;
+  text-decoration: underline;
+}
+
+#chat-container ul {
+  list-style-type: disc;
+  margin-left: 1.5em;
+}
+
+#chat-container ol {
+  list-style-type: decimal;
+  margin-left: 1.5em;
+}
+
+#chat-container h3 {
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+.conversation-item {
+  transition: all 0.2s ease;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.conversation-item:hover {
+  transform: translateX(4px);
+}
+
+.active-conversation {
+  border-left: 3px solid #60a5fa;
+  background: linear-gradient(90deg, rgba(96,165,250,0.1) 0%, rgba(96,165,250,0) 100%);
+}
+
+.new-convo-btn {
+  transition: all 0.2s ease;
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.new-convo-btn:hover {
+  transform: scale(1.1);
+}
+
+.delete-btn {
+  font-size: 1.25rem;
+  line-height: 1;
+  padding: 0 0.25rem;
+}
+
+.delete-btn:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+
