@@ -7,6 +7,7 @@ import rehypeRaw from 'rehype-raw';
 import rehypeSanitize from 'rehype-sanitize';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { materialDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import ConversationHistory from '../components/conversationHistory';
 
 interface Message {
   content: string;
@@ -56,7 +57,9 @@ export default function Home() {
       .then(res => res.json())
       .then(messages => {
         setMessages(messages.map((msg: any) => ({
-          content: msg.text,
+          content: msg.text
+            .replace(/^(\n|\r)+/, '') // Remove leading newlines
+            .trimStart(), // Trim leading whitespace
           isUser: msg.is_user,
           isStreaming: msg.is_ai ? false : undefined
         })));
@@ -156,7 +159,14 @@ export default function Home() {
           setMessages(prev => {
             const newMessages = [...prev];
             const lastMessage = newMessages[newMessages.length - 1];
-            lastMessage.content = aiResponse;
+            
+            // Trim leading newlines and whitespace
+            const cleanedContent = aiResponse
+              .replace(/^(\n|\r)+/, '') // Remove leading newlines
+              .replace(/(\\n)/g, '\n')
+              .trimStart();
+
+            lastMessage.content = cleanedContent;
             return newMessages;
           });
         }
@@ -176,7 +186,8 @@ export default function Home() {
         if (!lastMessage.isUser) {
           lastMessage.content = aiResponse
             .replace(/(\\n)/g, '\n')
-            .replace(/(\*\*|__)/g, '**');
+            .replace(/^(\n|\r)+/, '')
+            .trimStart();
           lastMessage.isStreaming = false;
         }
         return newMessages;
@@ -230,48 +241,15 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-row h-screen bg-gray-900 text-white">
+    <div className="flex flex-row h-screen bg-neutral-950 text-neutral-200">
       {/* History panel */}
-      <div className="w-64 bg-gray-800 border-gray-600 flex flex-col h-full">
-        <div className="p-4 pb-0 flex justify-between items-center">
-          <h2 className="text-lg font-semibold">Conversation History</h2>
-          <button
-            onClick={handleNewConversation}
-            className="p-2 rounded hover:bg-gray-700 text-gray-400 hover:text-white"
-          >
-            +
-          </button>
-        </div>
-        <div className="flex-1 overflow-y-auto p-4 pt-0 space-y-4">
-          {/* Today Section */}
-          <div>
-            <h3 className="text-xs text-gray-500 uppercase mb-2">Today</h3>
-            <div className="space-y-2">
-              {conversations?.map(convo => (
-                <div 
-                  key={convo.id}
-                  className={`group flex justify-between items-center p-2 rounded hover:bg-gray-700 cursor-pointer ${
-                    selectedConversation === convo.id ? 'bg-gray-700' : 'text-gray-400'
-                  }`}
-                >
-                  <span onClick={() => loadConversation(convo.id)} className="flex-1">
-                    {convo.topic}
-                  </span>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDeleteConversation(convo.id);
-                    }}
-                    className="ml-2 p-1 rounded hover:bg-gray-600 text-red-400 hover:text-red-300 opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    ×
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
+      <ConversationHistory 
+        conversations={conversations}
+        selectedConversation={selectedConversation}
+        onConversationLoad={loadConversation}
+        onNewConversation={handleNewConversation}
+        onConversationDelete={handleDeleteConversation}
+      />
 
       {/* Main chat container */}
       <div className="flex-1 flex flex-col p-4">
@@ -285,8 +263,8 @@ export default function Home() {
                   key={`${index}-${message.content.substring(0,10)}`}
                   className={`flex justify-${message.isUser ? 'end' : 'start'}`}
                 >
-                  <div style={{ whiteSpace: 'pre-line' }} className={`text-white rounded-lg p-3 max-w-[60%] ${
-                    message.isUser ? 'bg-gray-700 ml-auto' : '#1f2937'
+                  <div style={{ whiteSpace: 'pre-line' }} className={`text-neutral-200 rounded-lg p-3 max-w-[60%] ${
+                    message.isUser ? 'bg-neutral-800 ml-auto' : 'bg-neutral-900'
                   } ${message.isStreaming ? 'animate-pulse' : ''}`}>
                     <ReactMarkdown
                       children={message.content}
@@ -321,7 +299,7 @@ export default function Home() {
         </div>
 
         {/* Input area */}
-        <div className="border-gray-600 pt-4">
+        <div className="border-neutral-700 pt-4">
           <div className="max-w-6xl mx-auto">
             <form onSubmit={handleSubmit} className="flex gap-2">
               <input
@@ -329,7 +307,7 @@ export default function Home() {
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
                 placeholder="Type your message..."
-                className="flex-1 border border-gray-600 rounded-lg p-2 bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 placeholder-gray-400"
+                className="flex-1 border border-neutral-700 rounded-lg p-2 bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-neutral-600 placeholder-neutral-500"
                 disabled={isLoading}
               />
               <button
@@ -337,8 +315,8 @@ export default function Home() {
                 disabled={isLoading}
                 className={`px-4 py-2 rounded-lg transition-colors ${
                   isLoading 
-                    ? 'bg-gray-600 cursor-not-allowed' 
-                    : 'bg-gray-700 hover:bg-gray-600'
+                    ? 'bg-neutral-600 cursor-not-allowed' 
+                    : 'bg-neutral-700 hover:bg-neutral-600'
                 }`}
               >
                 {isLoading ? 'Sending...' : 'Send'}

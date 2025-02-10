@@ -27,17 +27,17 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #1f2937; /* bg-gray-800 */
+  background: #262626; /* neutral-800 */
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #4b5563; /* bg-gray-600 */
+  background: #404040; /* neutral-700 */
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #6b7280; /* bg-gray-500 */
+  background: #525252; /* neutral-600 */
 }
 
 .prose-invert {
@@ -61,22 +61,23 @@ body {
 }
 
 .prose-invert code {
-  background-color: #374151;
+  background-color: #404040; /* neutral-700 */
   padding: 0.2em 0.4em;
   border-radius: 0.25rem;
   font-family: monospace;
 }
 
 .prose-invert pre {
-  background-color: #1f2937;
+  background-color: #171717; /* neutral-900 */
   padding: 1rem;
   border-radius: 0.5rem;
   overflow-x: auto;
   margin: 0.5rem 0;
+  border: 1px solid #262626; /* neutral-800 */
 }
 
 .prose-invert a {
-  color: #60a5fa;
+  color: #a3a3a3; /* neutral-400 */
   text-decoration: underline;
 }
 
@@ -103,12 +104,12 @@ body {
 }
 
 .conversation-item:hover {
-  transform: translateX(4px);
+  background-color: #262626; /* neutral-800 */
 }
 
 .active-conversation {
-  border-left: 3px solid #60a5fa;
-  background: linear-gradient(90deg, rgba(96,165,250,0.1) 0%, rgba(96,165,250,0) 100%);
+  border-left: 3px solid #404040; /* neutral-700 */
+  background: linear-gradient(90deg, rgba(64,64,64,0.1) 0%, rgba(64,64,64,0) 100%);
 }
 
 .new-convo-btn {

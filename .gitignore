@@ -4,6 +4,7 @@
 *node_modules*
 */.next/*
 */.react*
+dfs_api/roas.db
 
 /.pnp
 .pnp.*

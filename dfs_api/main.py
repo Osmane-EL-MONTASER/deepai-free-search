@@ -131,6 +131,7 @@ async def query(request: Request):
         async def stream_generator():
             full_response = ""
             is_thinking = True
+            is_first_chunk = True
 
             # Send conversation ID first if new conversation
             if not conversation_id:
@@ -142,11 +143,15 @@ async def query(request: Request):
             }):
                 if "</think>" in chunk:
                     is_thinking = False
-                if not is_thinking:
+                if not is_thinking and not is_first_chunk:
+                    is_first_chunk = False
+                else:
                     full_response += chunk
-                    
+
+
                 ai_msg.text = full_response
-                session.commit()
+                if not is_first_chunk:
+                    session.commit()
                 yield chunk
             # Final commit after streaming completes
             ai_msg.text = full_response

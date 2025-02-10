@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Real Open AI Search",
+  title: "DeepAI Free Search",
   description: "Real Open AI Search, a deep search engine for free and that runs on your own computer.",
 };
 
