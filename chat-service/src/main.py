@@ -22,6 +22,14 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     
     logger.info(f"ChromaDB connection {'successful' if chroma_connected else 'failed'}")
     
+    # Initialize OllamaStreamingService
+    ollama_service = OllamaStreamingService(
+        vector_store=vector_store)
+    ollama_initialized = await ollama_service.initialize_model()
+    app.state.ollama_service = ollama_service
+    
+    logger.info(f"Ollama initialization {'successful' if ollama_initialized else 'failed'}")
+    
     yield
     
     logger.info("Shutting down...")
@@ -52,9 +60,10 @@ app = create_app()
 async def health_check():
     """Health check endpoint"""
     vector_store: VectorStoreManager = app.state.vector_store
+    ollama_service: OllamaStreamingService = app.state.ollama_service
     return {
         "status": "OK",
         "environment": settings.app_env,
-        "chroma_connected": vector_store.is_connected if vector_store else False,
-        "ollama_available": False  # We'll implement this next
+        "chroma_connected": vector_store.is_connected,
+        "ollama_available": ollama_service.is_initialized
     } 
