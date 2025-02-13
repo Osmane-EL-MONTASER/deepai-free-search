@@ -41,9 +41,7 @@ docker-compose up --build
 3. Access the chat service
 
 ```bash
-curl -X POST http://localhost:8000/chat/message \
-  -H "Content-Type: application/json" \
-  -d '{"messages": [{"role": "user", "content": "Hello, who are you? Nice to meet you!"}]}'
+curl -X POST http://localhost:8000/chat/message -H "Content-Type: application/json" -d '{"messages": [{"role": "user", "content": "Hello, who are you? Nice to meet you!"}]}'
 ```
 
 
