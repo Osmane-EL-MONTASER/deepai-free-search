@@ -11,7 +11,7 @@ My own chat service with real-time streaming powered by Ollama LLMs and ChromaDB
 - **Real-time Streaming**  
   Low-latency chat responses using Server-Sent Events (SSE)
 - **Context-Aware Conversations**  
-  Integrated ChromaDB vector store for contextual responses
+  Integrated ChromaDB vector store to remember old conversations
 - **Production-Ready**  
   Dockerized with health checks and configuration management
 - **Scalable Architecture**  
