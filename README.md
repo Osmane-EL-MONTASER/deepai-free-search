@@ -11,7 +11,7 @@ My own chat service with real-time streaming powered by Ollama LLMs and ChromaDB
 - **Real-time Streaming**  
   Low-latency chat responses using Server-Sent Events (SSE)
 - **Context-Aware Conversations**  
-  ✨ *Coming Soon: Integrated ChromaDB vector store for contextual responses* ✨
+  Integrated ChromaDB vector store to remember old conversations
 - **Production-Ready**  
   Dockerized with health checks and configuration management
 - **Scalable Architecture**  
@@ -36,12 +36,6 @@ cd deepai-free-search
 
 ```bash
 docker-compose up --build
-```
-
-3. Download the deepseek-r1:7b model from ollama:
-
-```bash
-docker exec ollama ollama pull deepseek-r1:7b
 ```
 
 4. Access the chat service
