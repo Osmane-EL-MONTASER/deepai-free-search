@@ -1,0 +1,96 @@
+services:
+  api-gateway:
+    image: node:18
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./api-gateway:/app
+    working_dir: /app
+    command: sh -c "npm install && npm start"
+    environment:
+      CHAT_SERVICE_URL: http://chat-service:8000
+      CONVERSATION_SERVICE_URL: http://conversation-service:8000
+    depends_on:
+      - chat-service
+      - conversation-service
+    networks:
+      - app-network
+
+  chat-service:
+    build: ./chat-service
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+      CHROMA_HOST: chromadb
+      CHROMA_PORT: 8000
+      APP_ENV: production
+    ports:
+      - "8001:8000"
+    volumes:
+      - ./chat-service:/app
+    depends_on:
+      chromadb:
+        condition: service_healthy
+      ollama:
+        condition: service_started
+    networks:
+      - app-network
+
+  conversation-service:
+    image: python:3.10
+    environment:
+      POSTGRES_HOST: postgres
+    depends_on:
+      - postgres
+
+  chromadb:
+    image: chromadb/chroma
+    ports:
+      - "8003:8000"
+    volumes:
+      - chroma_data:/chroma
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/heartbeat"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - app-network
+
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: conversations
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+  ollama:
+    image: ollama/ollama
+    volumes:
+      - ollama_data:/root/.ollama
+    ports:
+      - "11434:11434"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - app-network
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  chroma_data:
+  pg_data:
+  ollama_data:

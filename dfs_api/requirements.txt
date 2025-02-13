@@ -1,6 +1,0 @@
-fastapi
-uvicorn
-langchain
-python-dotenv
-pydantic-settings
-langchain_community
