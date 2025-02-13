@@ -5,6 +5,8 @@
 */.next/*
 */.react*
 dfs_api/roas.db
+*__pycache__*
+*.pyc
 
 /.pnp
 .pnp.*
