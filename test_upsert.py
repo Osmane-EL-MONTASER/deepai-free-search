@@ -6,9 +6,9 @@ conv_id = str(uuid.uuid4())
 
 # Store test knowledge
 test_docs = [{
-    "id": "test_000",
+    "id": "test_006",
     "text": """
-                PUT YOUR KNOWLEDGE HERE
+                One of my cats is black with a white tail.
             """,
     "metadata": {
         "timestamp": "2025-02-13"
@@ -20,7 +20,7 @@ upsert_response = requests.post(
     "http://localhost:8000/chat/upsert",
     json={
         "documents": test_docs,
-        "conversation_id": "5b4332bb-12df-4173-9186-d63f6586ca40"
+        "user_id": "5b4332bb-12df-4173-9186-d63f6586ca40"
     }
 )
 print(f"Upsert Status: {upsert_response.status_code}")

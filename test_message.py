@@ -2,22 +2,21 @@ import requests
 import uuid
 import json
 
-# Create test conversation
-conv_id = str(uuid.uuid4())
-
 chat_response = requests.post(
     "http://localhost:8000/chat/message",
     json={
         "messages": [
-            {"role": "user", "content": "What do you know about my project"}
+            {"role": "user", "content": """Hello Deepseek! What is my name?"""}
         ],
-        "conversation_id": "5b4332bb-12df-4173-9186-d63f6586ca40"
+        "user_id": "2d372ddb-7cb6-46a9-8897-bdbc594ff37d",
+        "conversation_id": "99f08a62-7fec-4563-9b53-80471ed0a2a3"
     },
     stream=True
 )
 
 # Print responses
 print("Chat Response:")
+
 for line in chat_response.iter_lines():
     if line:
         decoded_line = line.decode('utf-8')
@@ -28,3 +27,6 @@ for line in chat_response.iter_lines():
                     print(event_data['data']['content'], end='', flush=True)
             except json.JSONDecodeError:
                 pass  # Ignore invalid JSON lines
+        if event_data.get('event') == 'end':
+            print(event_data['data']['user_id'])
+            print(event_data['data']['conversation_id'])

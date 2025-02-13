@@ -77,9 +77,9 @@ class OllamaStreamingService:
                     temperature=0,  # Safe default
                     streaming=True,
                     max_retries=3,
-                    max_tokens=4096,
+                    max_tokens=120000,
                     request_timeout=settings.request_timeout,
-                    system="You are a helpful assistant. Respond concisely.",
+                    system="You are a helpful assistant. Respond concisely using markdown when needed.",
                     stop=["<|im_end|>", "<|endoftext|>"],  # Common EOS tokens
                     headers={"Content-Type": "application/json"},
                     safe_mode=True  # Ollama's built-in content safety
@@ -118,6 +118,7 @@ class OllamaStreamingService:
     async def generate_stream(
         self,
         messages: list,
+        user_id: str,
         conversation_id: str) -> AsyncIterator[dict]:
         """Main streaming generation method
         
@@ -134,7 +135,7 @@ class OllamaStreamingService:
             raise StreamConnectionError("LLM service unavailable")
         
         lc_messages = []
-        logger.debug(f"Received {len(messages)} messages for conversation {conversation_id}")
+        logger.debug(f"Received {len(messages)} messages for user {user_id}")
         
         try:
             for i, msg in enumerate(messages):
@@ -155,9 +156,9 @@ class OllamaStreamingService:
         # Add context retrieval at start of stream
         context = await self._vector_store.get_relevant_context(
             query=messages[-1].content,  # Last user message
-            conversation_id=conversation_id
+            user_id=user_id
         )
-        print(context)
+        
         # Format context into system message
         if context:
             context_text = "\n".join([doc["text"] for doc in context])
@@ -177,6 +178,7 @@ class OllamaStreamingService:
                     "event": "message",
                     "data": {
                         "content": chunk.content,
+                        "user_id": user_id,
                         "conversation_id": conversation_id,
                         "model": settings.llm_model
                     },
@@ -191,7 +193,8 @@ class OllamaStreamingService:
                 "event": "end",
                 "data": {
                     "status": "completed",
-                    "conversation_id": conversation_id  # Include in final message
+                    "user_id": user_id,
+                    "conversation_id": conversation_id
                 },
                 "retry": retry_timeout
             }

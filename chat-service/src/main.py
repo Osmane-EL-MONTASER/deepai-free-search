@@ -18,6 +18,9 @@ from src.schemas import DocumentUpsertRequest
 configure_logging()
 logger = logging.getLogger(__name__)
 
+# Add conversation storage at the top
+conversations = {}  # Stores conversation history {conversation_id: {user_id: str, messages: list}}
+
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Handle startup and shutdown events"""
@@ -84,26 +87,58 @@ class ChatRequest(BaseModel):
     messages: List[ChatMessage]
     model: Optional[str] = None
     stream: Optional[bool] = True
+    user_id: Optional[str] = Field(
+        default_factory=lambda: str(uuid.uuid4()),
+        pattern=r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    )
     conversation_id: Optional[str] = Field(
-        default_factory=lambda: str(uuid.uuid4()),  # Generate ID if not provided
-        pattern=r"^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-4[a-fA-F0-9]{3}-[89abAB][a-fA-F0-9]{3}-[a-fA-F0-9]{12}$"  # UUID validation
+        default_factory=lambda: str(uuid.uuid4()),
+        pattern=r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
     )
 
 @app.post("/message")
 async def chat_endpoint(request: ChatRequest):
     ollama_service: OllamaStreamingService = app.state.ollama_service
     
+    # Get or create conversation
+    conv = conversations.get(request.conversation_id, {
+        "user_id": request.user_id,  # Will use generated ID if not provided
+        "messages": []
+    })
+    
+    # Combine with history
+    full_messages = [
+        *[ChatMessage(**msg) for msg in conv["messages"]],
+        *request.messages
+    ]
+    
     async def generate():
+        full_response = []
         async for chunk in ollama_service.generate_stream(
-            messages=request.messages,
+            messages=full_messages,
+            user_id=request.user_id,
             conversation_id=request.conversation_id
         ):
-            # Convert to SSE format
+            # Collect response content
+            if chunk.get("event") == "message":
+                full_response.append(chunk["data"]["content"])
+            
             yield f"data: {json.dumps(chunk)}\n\n"
+        
+        # Update conversation history after stream completes
+        conv["messages"].extend([
+            *[msg.dict() for msg in request.messages],
+            {"role": "assistant", "content": "".join(full_response)}
+        ])
+        conversations[request.conversation_id] = conv
     
     return StreamingResponse(
         generate(),
-        media_type="text/event-stream"
+        media_type="text/event-stream",
+        headers={
+            "X-User-ID": request.user_id,
+            "X-Conversation-ID": request.conversation_id
+        }
     )
 
 @app.post("/upsert")
@@ -112,7 +147,7 @@ async def upsert_documents(data: DocumentUpsertRequest):
     try:
         await app.state.vector_store.upsert_documents(
             documents=data.documents,
-            conversation_id=data.conversation_id
+            user_id=data.user_id
         )
         return {"status": "success"}
     except Exception as e:

@@ -59,7 +59,7 @@ class VectorStoreManager:
             
         return self._embedding_fn([text])[0]
 
-    async def get_relevant_context(self, query: str, conversation_id: str, k: int = 3) -> List[Dict[str, Any]]:
+    async def get_relevant_context(self, query: str, user_id: str, k: int = 3) -> List[Dict[str, Any]]:
         """Retrieve relevant context from vector store"""
         if not self.is_connected:
             return []
@@ -69,7 +69,7 @@ class VectorStoreManager:
             results = self._client.similarity_search_with_score(
                 query=query,
                 k=k,
-                filter={"conversation_id": conversation_id}
+                filter={"user_id": user_id}
             )
 
             return [
@@ -84,19 +84,19 @@ class VectorStoreManager:
             logger.error("Context retrieval failed", extra={
                 "error": str(e),
                 "error_type": type(e).__name__,
-                "conversation_id": conversation_id,
+                "user_id": user_id,
                 "query": query
             })
             return []
 
-    async def upsert_documents(self, documents: List[Dict[str, Any]], conversation_id: str):
+    async def upsert_documents(self, documents: List[Dict[str, Any]], user_id: str):
         """Store documents with metadata in ChromaDB"""
         if not self.is_connected:
             raise ConnectionError("ChromaDB not connected")
 
         try:
             ids = [str(doc["id"]) for doc in documents]
-            metadatas = [{**doc["metadata"], "conversation_id": conversation_id} for doc in documents]
+            metadatas = [{**doc["metadata"], "user_id": user_id} for doc in documents]
             texts = [doc["text"] for doc in documents]
             
             # Use LangChain's add_texts method which handles embeddings automatically
@@ -105,7 +105,7 @@ class VectorStoreManager:
                 metadatas=metadatas,
                 ids=ids
             )
-            logger.info(f"Upserted {len(documents)} documents for conversation {conversation_id}")
+            logger.info(f"Upserted {len(documents)} documents for user {user_id}")
         except Exception as e:
             logger.error(f"Document upsert failed: {str(e)}")
             raise 
