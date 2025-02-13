@@ -21,9 +21,7 @@ My own chat service with real-time streaming powered by Ollama LLMs and ChromaDB
 
 ### Prerequisites
 
-- Docker 20.10+
-- Docker Compose 2.20+
-- Ollama server running with required models
+- Docker
 
 ### Installation
 
