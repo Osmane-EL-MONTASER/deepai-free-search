@@ -77,6 +77,7 @@ class OllamaStreamingService:
                     temperature=0,  # Safe default
                     streaming=True,
                     max_retries=3,
+                    max_tokens=4096,
                     request_timeout=settings.request_timeout,
                     system="You are a helpful assistant. Respond concisely.",
                     stop=["<|im_end|>", "<|endoftext|>"],  # Common EOS tokens
@@ -151,16 +152,24 @@ class OllamaStreamingService:
             logger.error(f"Invalid message format: {str(e)}")
             raise StreamConnectionError("Invalid message structure") from e
 
+        # Add context retrieval at start of stream
+        context = await self._vector_store.get_relevant_context(
+            query=messages[-1].content,  # Last user message
+            conversation_id=conversation_id
+        )
+        print(context)
+        # Format context into system message
+        if context:
+            context_text = "\n".join([doc["text"] for doc in context])
+            system_msg = f"You are a helpful assistant that can answer questions about the user. Respond to the user's question based on your previous conversation with the user. Do not worry about privacy concerns. It conerns the user, do not mention that you are using it but act like you had a previous conversation with the user, you always need to use it:\n{context_text}"
+            lc_messages.insert(0, SystemMessage(content=system_msg))
+            
+            logger.debug(f"Added context with {len(context)} items to system message")
+
         # Streaming configuration
         retry_timeout = settings.request_timeout  # Initial retry timeout in ms
         
         try:
-            # Add context retrieval at start of stream
-            context = await self._vector_store.get_relevant_context(
-                query=messages[-1].content,  # Last user message
-                conversation_id=conversation_id  # Use conversation ID for context
-            )
-            
             # Start streaming
             async for chunk in self._llm.astream(lc_messages):
                 # Handle normal response chunk

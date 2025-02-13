@@ -24,7 +24,7 @@ class AppSettings(BaseSettings):
     
     # Ollama configuration
     ollama_host: AnyUrl = "http://ollama:11434"
-    embedding_model: str = "nomic-embed-text"
+    embedding_model: str = "nomic-embed-text:latest"
     llm_model: str = "deepseek-r1:7b"
     
     # Rate limiting

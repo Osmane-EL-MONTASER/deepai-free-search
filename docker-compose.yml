@@ -78,6 +78,8 @@ services:
       retries: 3
     networks:
       - app-network
+    expose:
+      - "11434"
     deploy:
       resources:
         reservations:

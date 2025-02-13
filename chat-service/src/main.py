@@ -11,6 +11,8 @@ from typing import List, Optional
 from fastapi.responses import StreamingResponse
 import json
 import uuid
+from fastapi.responses import JSONResponse
+from src.schemas import DocumentUpsertRequest
 
 # Initialize logging before anything else
 configure_logging()
@@ -103,3 +105,18 @@ async def chat_endpoint(request: ChatRequest):
         generate(),
         media_type="text/event-stream"
     )
+
+@app.post("/upsert")
+async def upsert_documents(data: DocumentUpsertRequest):
+    """Endpoint for testing document insertion"""
+    try:
+        await app.state.vector_store.upsert_documents(
+            documents=data.documents,
+            conversation_id=data.conversation_id
+        )
+        return {"status": "success"}
+    except Exception as e:
+        return JSONResponse(
+            status_code=500,
+            content={"error": str(e)}
+        )
