@@ -38,7 +38,13 @@ cd deepai-free-search
 docker-compose up --build
 ```
 
-3. Access the chat service
+3. Download the deepseek-r1:7b model from ollama:
+
+```bash
+docker exec ollama ollama pull deepseek-r1:7b
+```
+
+4. Access the chat service
 
 ```bash
 curl -X POST http://localhost:8000/chat/message -H "Content-Type: application/json" -d '{"messages": [{"role": "user", "content": "Hello, who are you? Nice to meet you!"}]}'
